@@ -101,9 +101,11 @@ def classify_emotion_tone(text: str, compound_score: float) -> str:
     """
     Classifies comment tone into core categories:
     - Anger / Outrage
+    - Betrayal
+    - Disappointment
     - Disgust / Criticism
-    - Support / Loyalty
     - Fear / Concern
+    - Support / Loyalty
     - Skepticism / Neutral
     """
     if not text:
@@ -111,18 +113,54 @@ def classify_emotion_tone(text: str, compound_score: float) -> str:
     
     text_lower = text.lower()
     
-    # Emotion Keyphrase Patterns
-    anger_keywords = ["hate", "boycott", "outrage", "disgrace", "ridiculous", "idiot", "stupid", "garbage", "trash", "crap", "disgusting", "shame", "coward", "woke", "bigot", "fascist", "cancel", "scum"]
-    criticism_keywords = ["fail", "caved", "backtrack", "hypocrite", "ruined", "drop", "stop", "terrible", "awful", "pander", "money", "greed", "mistake"]
-    fear_keywords = ["fear", "scared", "threat", "violence", "danger", "warning", "afraid", "risk", "harm", "worry", "attack", "gun", "terror"]
-    support_keywords = ["support", "love", "great", "good", "respect", "agree", "based", "right", "smart", "thank", "proud", "hero", "stand with"]
+    # Emotion Keyphrase Patterns (Enriched English Terminology)
+    betrayal_keywords = [
+        "betray", "betrayed", "betrayal", "traitor", "traitors", "treason",
+        "backstab", "backstabbed", "backstabbing", "backstabber", "sold out",
+        "sellout", "turncoat", "stabbed in the back", "stab in the back",
+        "double-cross", "switched sides", "unfaithful", "false promises"
+    ]
+    disappointment_keywords = [
+        "disappoint", "disappointed", "disappointing", "disappointment",
+        "letdown", "let down", "expected better", "shame", "shameful",
+        "saddening", "unfortunate", "pity", "baffled", "baffling", "bummer",
+        "disillusioned", "disheartening", "disheartened", "regret", "regrettable",
+        "sadly", "underwhelmed", "lost respect", "unacceptable"
+    ]
+    anger_keywords = [
+        "hate", "boycott", "boycotting", "boycotts", "outrage", "disgrace",
+        "ridiculous", "idiot", "stupid", "garbage", "trash", "crap",
+        "disgusting", "coward", "woke", "bigot", "fascist", "cancel", "scum",
+        "infuriating", "pissed", "furious", "nauseating", "clowns", "bullshit"
+    ]
+    criticism_keywords = [
+        "fail", "failed", "caved", "caving", "backtrack", "hypocrite", "hypocrisy",
+        "ruined", "drop", "stop", "terrible", "awful", "pander", "pandering",
+        "money", "greed", "mistake", "spineless", "clueless", "incompetent", "patronizing"
+    ]
+    fear_keywords = [
+        "fear", "scared", "threat", "threatened", "threats", "violence", "danger",
+        "warning", "afraid", "risk", "harm", "worry", "attack", "gun", "terror",
+        "terrified", "terrifying", "unsafe", "hostile", "scary", "intimidate", "intimidation"
+    ]
+    support_keywords = [
+        "support", "love", "great", "good", "respect", "agree", "based", "right",
+        "smart", "thank", "thanks", "proud", "hero", "stand with", "awesome",
+        "solid", "kudos", "props", "bravo", "fair", "sensible"
+    ]
 
+    has_betrayal = any(k in text_lower for k in betrayal_keywords)
+    has_disappointment = any(k in text_lower for k in disappointment_keywords)
     has_anger = any(k in text_lower for k in anger_keywords)
     has_criticism = any(k in text_lower for k in criticism_keywords)
     has_fear = any(k in text_lower for k in fear_keywords)
     has_support = any(k in text_lower for k in support_keywords)
 
-    if has_anger and compound_score < 0:
+    if has_betrayal:
+        return "Betrayal"
+    elif has_disappointment:
+        return "Disappointment"
+    elif has_anger and compound_score < 0:
         return "Anger / Outrage"
     elif has_fear:
         return "Fear / Concern"
@@ -181,12 +219,11 @@ def perform_topic_modeling(df_case: pd.DataFrame, n_topics=3, n_words=5) -> list
 
 
 def generate_visualizations(df: pd.DataFrame, output_dir="output/plots"):
-    """Generates all 6 analytical charts and saves them to PNG files."""
+    """Generates all 9 analytical charts and saves them to PNG files."""
     os.makedirs(output_dir, exist_ok=True)
     logging.info(f"Generating NLP analytical charts in {output_dir}...")
 
     palette = {"Positive": "#2ecc71", "Neutral": "#95a5a6", "Negative": "#e74c3c"}
-    case_palette = ["#1f77b4", "#ff7f0e", "#2ca02c"]
 
     # 1. Sentiment Distribution by Case (Stacked Bar Chart)
     plt.figure(figsize=(10, 6))
@@ -223,13 +260,13 @@ def generate_visualizations(df: pd.DataFrame, output_dir="output/plots"):
     plt.close()
 
     # 3. Emotion Distribution by Case (Grouped Bar Chart)
-    plt.figure(figsize=(12, 6))
-    emotion_order = ["Anger / Outrage", "Disgust / Criticism", "Fear / Concern", "Support / Loyalty", "Skepticism / Neutral"]
+    plt.figure(figsize=(14, 6))
+    emotion_order = ["Anger / Outrage", "Betrayal", "Disappointment", "Disgust / Criticism", "Fear / Concern", "Support / Loyalty", "Skepticism / Neutral"]
     sns.countplot(data=df, x='Emotion_Tone', hue='Case', order=emotion_order, palette='Set2')
     plt.title("Emotion & Tone Distribution by Brand Controversy", fontsize=14, fontweight='bold', pad=15)
     plt.xlabel("Emotion / Tone Category", fontsize=12)
     plt.ylabel("Comment Count", fontsize=12)
-    plt.xticks(rotation=15, fontsize=10)
+    plt.xticks(rotation=20, ha='right', fontsize=10)
     plt.legend(title="Brand Case")
     plt.tight_layout()
     plt.savefig(f"{output_dir}/03_emotion_distribution_by_case.png", dpi=300)
@@ -237,9 +274,8 @@ def generate_visualizations(df: pd.DataFrame, output_dir="output/plots"):
 
     # 4. Upvote Score vs. Sentiment (Boxplot)
     plt.figure(figsize=(9, 6))
-    # Filter score outliers for clean visualization (between -10 and 100)
     df_filtered_score = df[(df['Upvotes / Score'] >= -5) & (df['Upvotes / Score'] <= 150)]
-    sns.boxplot(data=df_filtered_score, x='Sentiment_Label', y='Upvotes / Score', palette=palette, order=["Positive", "Neutral", "Negative"])
+    sns.boxplot(data=df_filtered_score, x='Sentiment_Label', y='Upvotes / Score', hue='Sentiment_Label', palette=palette, order=["Positive", "Neutral", "Negative"], legend=False)
     plt.title("Comment Upvote Score Distribution by Sentiment", fontsize=14, fontweight='bold', pad=15)
     plt.xlabel("Sentiment Label", fontsize=12)
     plt.ylabel("Upvotes / Score", fontsize=12)
@@ -280,7 +316,196 @@ def generate_visualizations(df: pd.DataFrame, output_dir="output/plots"):
     plt.savefig(f"{output_dir}/06_wordcloud_by_case.png", dpi=300)
     plt.close()
 
-    logging.info("All 6 charts generated successfully!")
+def compute_hostility_index(subjectivity: float, compound: float, neg: float) -> float:
+    """
+    Calculates an Outrage & Hostility Index (0.0 to 1.0) per comment based on:
+    - Subjectivity (weight 0.4)
+    - Negative Compound Intensity (weight 0.4)
+    - Negative Sentiment Proportion (weight 0.2)
+    """
+    neg_intensity = max(0.0, -compound)
+    score = (subjectivity * 0.4) + (neg_intensity * 0.4) + (neg * 0.2)
+    return round(min(1.0, max(0.0, score)), 4)
+
+
+def generate_visualizations(df: pd.DataFrame, output_dir="output/plots"):
+    """Generates all 12 analytical charts and saves them to PNG files."""
+    os.makedirs(output_dir, exist_ok=True)
+    logging.info(f"Generating NLP analytical charts in {output_dir}...")
+
+    palette = {"Positive": "#2ecc71", "Neutral": "#95a5a6", "Negative": "#e74c3c"}
+    emotion_order = ["Anger / Outrage", "Betrayal", "Disappointment", "Disgust / Criticism", "Fear / Concern", "Support / Loyalty", "Skepticism / Neutral"]
+
+    # 1. Sentiment Distribution by Case (Stacked Bar Chart)
+    plt.figure(figsize=(10, 6))
+    sentiment_counts = pd.crosstab(df['Case'], df['Sentiment_Label'], normalize='index') * 100
+    ax = sentiment_counts[['Positive', 'Neutral', 'Negative']].plot(
+        kind='bar', stacked=True, color=['#2ecc71', '#bdc3c7', '#e74c3c'], figsize=(10, 6)
+    )
+    plt.title("Sentiment Distribution by Controversy Case (%)", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Brand Case", fontsize=12)
+    plt.ylabel("Percentage of Comments (%)", fontsize=12)
+    plt.xticks(rotation=0, fontsize=11)
+    plt.legend(title="Sentiment", frameon=True)
+    for p in ax.patches:
+        height = p.get_height()
+        if height > 5:
+            ax.annotate(f"{height:.1f}%", (p.get_x() + p.get_width() / 2., p.get_y() + height / 2.),
+                        ha='center', va='center', color='white', fontweight='bold', fontsize=10)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/01_sentiment_distribution_by_case.png", dpi=300)
+    plt.close()
+
+    # 2. Sentiment by Top Subreddits (Grouped Bar Chart)
+    plt.figure(figsize=(12, 6))
+    top_subs = df['Subreddit'].value_counts().head(8).index
+    df_top_subs = df[df['Subreddit'].isin(top_subs)]
+    sns.countplot(data=df_top_subs, x='Subreddit', hue='Sentiment_Label', palette=palette, order=top_subs)
+    plt.title("Sentiment Breakdown Across Top Subreddits", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Subreddit", fontsize=12)
+    plt.ylabel("Comment Count", fontsize=12)
+    plt.xticks(rotation=30, ha='right', fontsize=10)
+    plt.legend(title="Sentiment")
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/02_sentiment_by_subreddit.png", dpi=300)
+    plt.close()
+
+    # 3. Emotion Distribution by Case (Focal Highlight on Anger, Betrayal, Disappointment)
+    plt.figure(figsize=(14, 6))
+    sns.countplot(data=df, x='Emotion_Tone', hue='Case', order=emotion_order, palette='Set2')
+    plt.title("Emotion & Tone Distribution by Brand Controversy (Focus: Anger, Betrayal, Disappointment)", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Emotion / Tone Category", fontsize=12)
+    plt.ylabel("Comment Count", fontsize=12)
+    plt.xticks(rotation=20, ha='right', fontsize=10)
+    plt.legend(title="Brand Case")
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/03_emotion_distribution_by_case.png", dpi=300)
+    plt.close()
+
+    # 4. Upvote Score vs. Sentiment (Boxplot)
+    plt.figure(figsize=(9, 6))
+    df_filtered_score = df[(df['Upvotes / Score'] >= -5) & (df['Upvotes / Score'] <= 150)]
+    sns.boxplot(data=df_filtered_score, x='Sentiment_Label', y='Upvotes / Score', hue='Sentiment_Label', palette=palette, order=["Positive", "Neutral", "Negative"], legend=False)
+    plt.title("Comment Upvote Score Distribution by Sentiment", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Sentiment Label", fontsize=12)
+    plt.ylabel("Upvotes / Score", fontsize=12)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/04_upvote_vs_sentiment.png", dpi=300)
+    plt.close()
+
+    # 5. Top Bigrams by Case (Horizontal Bar Charts)
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6), sharey=False)
+    cases = df['Case'].unique()
+    for idx, case in enumerate(cases):
+        case_texts = df[df['Case'] == case]['Comment Text'].dropna().tolist()
+        top_bigrams = extract_top_ngrams(case_texts, ngram_range=(2, 2), top_n=10)
+        
+        if top_bigrams:
+            words, counts = zip(*top_bigrams)
+            axes[idx].barh(words[::-1], counts[::-1], color='#3498db')
+            axes[idx].set_title(f"Top Bigrams: {case}", fontsize=12, fontweight='bold')
+            axes[idx].set_xlabel("Frequency", fontsize=10)
+        else:
+            axes[idx].text(0.5, 0.5, "No Bigrams Found", ha='center', va='center')
+            
+    plt.suptitle("Most Frequent Keyphrase Bigrams per Brand Controversy", fontsize=15, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/05_top_ngrams_by_case.png", dpi=300)
+    plt.close()
+
+    # 6. Word Clouds per Case
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    for idx, case in enumerate(cases):
+        case_text = " ".join(df[df['Case'] == case]['Comment Text'].dropna().apply(clean_text_for_nlp))
+        wordcloud = WordCloud(width=600, height=400, background_color='white', stopwords=CUSTOM_STOPWORDS, colormap='Dark2').generate(case_text)
+        axes[idx].imshow(wordcloud, interpolation='bilinear')
+        axes[idx].axis("off")
+        axes[idx].set_title(f"{case}", fontsize=14, fontweight='bold')
+    plt.suptitle("Word Clouds of Comment Text per Brand Controversy", fontsize=16, fontweight='bold', y=1.01)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/06_wordcloud_by_case.png", dpi=300)
+    plt.close()
+
+    # 7. Engagement & Virality: Upvotes for Anger, Betrayal, Disappointment & Other Emotions
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(data=df_filtered_score, x='Emotion_Tone', y='Upvotes / Score', hue='Emotion_Tone', order=emotion_order, palette='Set3', legend=False)
+    plt.title("Engagement & Virality (Upvote Score) Across Emotion Categories (Anger, Betrayal, Disappointment Focus)", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Emotion / Tone Category", fontsize=12)
+    plt.ylabel("Upvotes / Score", fontsize=12)
+    plt.xticks(rotation=20, ha='right', fontsize=10)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/07_upvotes_by_emotion_boxplot.png", dpi=300)
+    plt.close()
+
+    # 8. Emotion Heatmap Across Top Subreddits (%)
+    plt.figure(figsize=(11, 7))
+    sub_emotion_ct = pd.crosstab(df_top_subs['Subreddit'], df_top_subs['Emotion_Tone'], normalize='index') * 100
+    sub_emotion_ct = sub_emotion_ct.reindex(columns=emotion_order).fillna(0)
+    sns.heatmap(sub_emotion_ct, annot=True, fmt=".1f", cmap="YlOrRd", cbar_kws={'label': 'Percentage of Subreddit Comments (%)'})
+    plt.title("Subreddit Ideological Profile: Emotion Distribution Heatmap (%)", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Emotion / Tone Category", fontsize=12)
+    plt.ylabel("Subreddit", fontsize=12)
+    plt.xticks(rotation=25, ha='right', fontsize=10)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/08_emotion_by_subreddit_heatmap.png", dpi=300)
+    plt.close()
+
+    # 9. Subjectivity vs. Polarity Sentiment Quadrant Plot
+    plt.figure(figsize=(10, 7))
+    sns.scatterplot(data=df, x='Polarity', y='Subjectivity', hue='Emotion_Tone', hue_order=emotion_order, palette='Set1', alpha=0.7, s=40)
+    plt.axvline(x=0, color='grey', linestyle='--', linewidth=0.8)
+    plt.axhline(y=0.5, color='grey', linestyle='--', linewidth=0.8)
+    plt.title("TextBlob Polarity vs. Subjectivity Quadrant by Emotion Tone", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Polarity (-1.0 Negative to +1.0 Positive)", fontsize=12)
+    plt.ylabel("Subjectivity (0.0 Objective to 1.0 Subjective)", fontsize=12)
+    plt.legend(title="Emotion Category", bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/09_sentiment_subjectivity_quadrant.png", dpi=300)
+    plt.close()
+
+    # 10. NEW EDA: Temporal Emotion Progression (Timeline of Anger, Betrayal, Disappointment)
+    df_temp = df.copy()
+    if 'Date (UTC)' in df_temp.columns:
+        df_temp['YearMonth'] = pd.to_datetime(df_temp['Date (UTC)'], errors='coerce').dt.to_period('M').astype(str)
+        df_focus_emotions = df_temp[df_temp['Emotion_Tone'].isin(["Anger / Outrage", "Betrayal", "Disappointment"])]
+        
+        plt.figure(figsize=(12, 6))
+        emotion_time_ct = pd.crosstab(df_focus_emotions['YearMonth'], df_focus_emotions['Emotion_Tone'])
+        emotion_time_ct.plot(kind='line', marker='o', linewidth=2, figsize=(12, 6), color=['#e74c3c', '#9b59b6', '#e67e22'])
+        plt.title("Temporal Progression of Primary Outrage Emotions: Anger, Betrayal & Disappointment", fontsize=14, fontweight='bold', pad=15)
+        plt.xlabel("Year-Month", fontsize=12)
+        plt.ylabel("Comment Count", fontsize=12)
+        plt.xticks(rotation=45, ha='right', fontsize=10)
+        plt.legend(title="Primary Outrage Emotion")
+        plt.tight_layout()
+        plt.savefig(f"{output_dir}/10_temporal_emotion_progression.png", dpi=300)
+        plt.close()
+
+    # 11. NEW EDA: Author Polarization & Emotional Stance Distribution
+    plt.figure(figsize=(12, 6))
+    top_authors = df[df['User / Author'] != '[deleted]']['User / Author'].value_counts().head(10).index
+    df_authors = df[df['User / Author'].isin(top_authors)]
+    sns.countplot(data=df_authors, y='User / Author', hue='Emotion_Tone', hue_order=emotion_order, palette='Set2')
+    plt.title("Top Active Authors: Emotional Stance & Category Breakdown", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Comment Count", fontsize=12)
+    plt.ylabel("Reddit User / Author", fontsize=12)
+    plt.legend(title="Emotion Category", loc='lower right')
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/11_author_polarization_clusters.png", dpi=300)
+    plt.close()
+
+    # 12. NEW EDA: Hostility & Outrage Toxicity Index across Emotions
+    plt.figure(figsize=(12, 6))
+    sns.boxplot(data=df, x='Emotion_Tone', y='Hostility_Index', hue='Emotion_Tone', order=emotion_order, palette='Reds', legend=False)
+    plt.title("Outrage & Hostility Index (OHI) Distribution Across Emotion Categories", fontsize=14, fontweight='bold', pad=15)
+    plt.xlabel("Emotion / Tone Category", fontsize=12)
+    plt.ylabel("Outrage & Hostility Index (0.0 Calm to 1.0 Severe)", fontsize=12)
+    plt.xticks(rotation=20, ha='right', fontsize=10)
+    plt.tight_layout()
+    plt.savefig(f"{output_dir}/12_hostility_toxicity_index.png", dpi=300)
+    plt.close()
+
+    logging.info("All 12 analytical charts generated successfully!")
 
 
 def main():
@@ -329,6 +554,13 @@ def main():
         for _, row in df_full.iterrows()
     ]
 
+    # Compute Outrage & Hostility Index
+    logging.info("Calculating Outrage & Hostility Index (OHI)...")
+    df_full['Hostility_Index'] = [
+        compute_hostility_index(row['Subjectivity'], row['Sentiment_Compound'], row['Sentiment_Neg'])
+        for _, row in df_full.iterrows()
+    ]
+
     # Remove temporary clean_text column before saving
     df_export = df_full.drop(columns=['Clean_Text'])
 
@@ -348,15 +580,31 @@ def main():
             pos_pct = (df_case['Sentiment_Label'] == 'Positive').mean() * 100
             neu_pct = (df_case['Sentiment_Label'] == 'Neutral').mean() * 100
             neg_pct = (df_case['Sentiment_Label'] == 'Negative').mean() * 100
+            
+            anger_pct = (df_case['Emotion_Tone'] == 'Anger / Outrage').mean() * 100
+            betrayal_pct = (df_case['Emotion_Tone'] == 'Betrayal').mean() * 100
+            disappointment_pct = (df_case['Emotion_Tone'] == 'Disappointment').mean() * 100
+            fear_pct = (df_case['Emotion_Tone'] == 'Fear / Concern').mean() * 100
+            support_pct = (df_case['Emotion_Tone'] == 'Support / Loyalty').mean() * 100
+            
             avg_compound = df_case['Sentiment_Compound'].mean()
+            avg_hostility = df_case['Hostility_Index'].mean()
+            avg_upvotes = df_case['Upvotes / Score'].mean()
             
             summary_nlp.append({
                 "Case": case_name,
                 "Total Comments": len(df_case),
                 "Avg Sentiment Score": round(avg_compound, 4),
+                "Avg Hostility Index": round(avg_hostility, 4),
+                "Avg Upvotes": round(avg_upvotes, 2),
                 "% Positive": round(pos_pct, 2),
                 "% Neutral": round(neu_pct, 2),
                 "% Negative": round(neg_pct, 2),
+                "% Anger": round(anger_pct, 2),
+                "% Betrayal": round(betrayal_pct, 2),
+                "% Disappointment": round(disappointment_pct, 2),
+                "% Fear": round(fear_pct, 2),
+                "% Support": round(support_pct, 2),
                 "Top Emotion": df_case['Emotion_Tone'].mode()[0] if not df_case.empty else "N/A"
             })
         df_sum_nlp = pd.DataFrame(summary_nlp)
