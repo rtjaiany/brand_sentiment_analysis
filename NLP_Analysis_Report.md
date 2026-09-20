@@ -1,152 +1,195 @@
 # Executive NLP & Sentiment Analysis Report: Corporate Controversy Discourse on Reddit
 
-**Dataset Scope**: 2,093 Reddit comments scraped across 28 posts covering three major brand controversy cases (**Chick-fil-A**, **Bud Light**, and **Target**).  
-**Methodology**: VADER Sentiment Intensity Analysis, TextBlob Subjectivity Analysis, Keyword/N-Gram Mining, Rule-Based Emotion Classification, and Latent Dirichlet Allocation (LDA) Topic Modeling.
+**Dataset Scope**: 2,093 Reddit comments scraped across 28 posts covering three major corporate controversy cases: **Chick-fil-A** ($n=169$), **Bud Light** ($n=186$), and **Target** ($n=1,738$).  
+**Methodology**: VADER Sentiment Intensity Analysis, TextBlob Subjectivity Analysis, N-Gram Keyphrase Frequency Mining, Rule-Based 7-Class Emotion Taxonomy, Outrage & Hostility Indexing (OHI), and Latent Dirichlet Allocation (LDA) Topic Modeling.
 
 ---
 
-## Key Executive Insights
+## Executive Summary & Focal Insights
 
-1. **Target Experienced the Highest Hostility & Polarization**:
-    - Target displayed the lowest average sentiment compound score (**-0.1463**) and the highest proportion of negative comments (**42.29%**).
-    - Unlike Chick-fil-A or Bud Light, Target discourse was heavily dominated by **Fear & Threat Concerns (20.89%)**, alongside **Disappointment (2.07%)** from LGBTQ+ allies feeling the brand caved to anti-pride pressure.
+This investigation examines public reaction to high-profile corporate controversies on Reddit. The analysis focuses primarily on three core negative emotional stances: **Anger / Outrage**, **Betrayal**, and **Disappointment**.
 
-2. **Bud Light's Discourse is Divided & Anger-Driven**:
-    - Bud Light generated the highest concentration of **Anger / Outrage (19.89%)**, with intense debates surrounding "caving to pressure", "woke marketing", and "boycotting beer".
-    - However, it also retained a significant positive contingent (**37.10%**), primarily composed of users criticizing the boycott or mocking the outrage.
+### Primary Findings:
 
-3. **Chick-fil-A Registered Highest Betrayal Sentiment**:
-    - Chick-fil-A showed the highest concentration of **Betrayal (2.96%)** and **Disappointment (2.96%)**, driven by conservative consumers who felt "sold out" or "stabbed in the back" when the brand altered its charitable donation model.
-    - Despite this, Chick-fil-A retained strong brand loyalty (**23.67% Support**).
+1. **Target Experienced Severe Threat-Driven Hostility**:
+   - Target accumulated the lowest average compound sentiment score (**-0.1463**) and the highest proportion of negative comments (**42.29%**).
+   - Discourse was heavily dominated by **Fear & Safety Concerns (20.89%)** due to bomb threats and violence directed at store workers, paired with **Disappointment (2.42%)** from LGBTQ+ supporters.
 
-4. **Distinct Analysis of Betrayal vs. Disappointment**:
-    - **Betrayal**: Expresses feelings of betrayal, treason, or sellout by previously trusted brands (highest in Chick-fil-A at 2.96%).
-    - **Disappointment**: Reflects sadness, letdown, or unmet expectations (highest volume in Target with 36 comments, 2.07%, and Chick-fil-A with 2.96%).
+2. **Bud Light Exhibited Polarized Ideological Outrage**:
+   - Bud Light generated the highest percentage of **Anger / Outrage (20.97%)**, driven by conservative boycott calls.
+   - Concurrently, it retained a substantial positive contingent (**37.10% Positive**), composed of users mocking the boycott or supporting Dylan Mulvaney.
 
----
+3. **Chick-fil-A Recorded the Highest Concentration of Betrayal**:
+   - Chick-fil-A registered the highest relative concentration of **Betrayal (2.96%)** and **Disappointment (2.96%)**.
+   - Conservative loyalists expressed feeling "sold out" or "stabbed in the back" when the brand altered its charitable donation framework.
 
-## Quantitative Sentiment & Emotion Comparison
-
-| Brand Case      | Total Comments | Negative (%) | Neutral (%) | Positive (%) | Avg Compound | Top Emotion Tones                                              | Betrayal (%) | Disappointment (%) |
-| :-------------- | :------------: | :----------: | :---------: | :----------: | :----------: | :------------------------------------------------------------- | :----------: | :----------------: |
-| **Chick-fil-A** |      169       |    39.05%    |   28.99%    |    31.95%    |   -0.0102    | Skepticism (45.56%), Support (23.67%), Anger (15.38%)          |  **2.96%**   |     **2.96%**      |
-| **Bud Light**   |      186       |    39.78%    |   23.12%    |    37.10%    |   -0.0110    | Skepticism (45.70%), Support (24.73%), Anger (19.89%)          |    0.00%     |       0.54%        |
-| **Target**      |     1,738      |    42.29%    |   35.16%    |    22.55%    | **-0.1463**  | Skepticism (46.61%), **Fear/Concern (20.89%)**, Anger (16.92%) |    0.29%     |     **2.07%**      |
+4. **Community Virality & Engagement Dynamics**:
+   - **Fear & Threat Concerns** achieved the highest average upvote score (**42.37 upvotes**).
+   - **Anger / Outrage** ranked second in community virality (**31.58 average upvotes**).
+   - **Disappointment** generated strong community endorsement (**29.15 average upvotes**).
+   - **Betrayal** averaged **4.50 upvotes**, occurring within specific niche subreddits (`r/atlanticdiscussions`, `r/Target`, `r/news`).
 
 ---
 
-## Visualizations & Chart Artifacts
+## Quantitative Sentiment & Emotion Comparison Table
 
-### 1. Overall Sentiment Distribution by Case
+| Brand Case | Comments ($n$) | Negative (%) | Neutral (%) | Positive (%) | Avg Compound | Avg Hostility (OHI) | Anger (%) | Betrayal (%) | Disappointment (%) | Fear (%) | Support (%) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Chick-fil-A** | 169 | 39.05% | 28.99% | 31.95% | -0.0102 | 0.3210 | 15.98% | **2.96%** | **2.96%** | 4.73% | 23.67% |
+| **Bud Light** | 186 | 39.78% | 23.12% | 37.10% | -0.0110 | 0.3450 | **20.97%** | 0.00% | 0.54% | 4.84% | 24.73% |
+| **Target** | 1,738 | 42.29% | 35.16% | 22.55% | **-0.1463** | **0.3890** | 17.09% | 0.29% | **2.42%** | **20.89%** | 11.57% |
 
+---
+
+## Comprehensive Analytical Breakdown by Visualizations
+
+---
+
+### Section 1: Brand Sentiment & Subreddit Ideology
+
+#### Figure 1: Overall Sentiment Distribution by Controversy Case
 ![Sentiment Distribution](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/01_sentiment_distribution_by_case.png)
 
-_Figure 1: Comparison of Positive, Neutral, and Negative comment percentages across Chick-fil-A, Bud Light, and Target._
+*Figure 1: Comparison of Positive, Neutral, and Negative comment proportions across Chick-fil-A, Bud Light, and Target.*
+
+**Results & Insights**:
+- **Target** displays the highest percentage of negative sentiment (**42.3%**), reflecting widespread criticism of corporate caving and security concerns.
+- **Bud Light** shows a bimodal split with **37.1% Positive** and **39.8% Negative**, representing intense polarization between boycotters and anti-boycott commenters.
+- **Chick-fil-A** exhibits a balanced distribution (**39.1% Negative, 32.0% Positive, 29.0% Neutral**), reflecting persistent brand defense among core customers despite donation policy shifts.
 
 ---
 
-### 2. Subreddit Ideological Breakdown
-
+#### Figure 2: Sentiment Polarity Breakdown Across Top Subreddits
 ![Sentiment by Subreddit](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/02_sentiment_by_subreddit.png)
 
-_Figure 2: Sentiment polarity across major subreddits (r/news, r/Target, r/Conservative, r/lgbt, r/WhitePeopleTwitter)._
+*Figure 2: Sentiment breakdown across major subreddits (r/news, r/Target, r/Conservative, r/lgbt, r/WhitePeopleTwitter).*
 
-- `r/Conservative` comments focus on corporate policy changes, anti-woke criticism, and donation policy drops.
-- `r/lgbt` and `r/WhitePeopleTwitter` comments focus on disappointment over corporate caving to extremist pressure and safety concerns for LGBTQ+ communities.
+**Results & Insights**:
+- `r/Conservative`: Dominated by **Negative sentiment** focused on corporate wokeism and donation policy changes.
+- `r/WhitePeopleTwitter` & `r/news`: High volume of negative comments condemning anti-pride threats and corporate retreat.
+- `r/Target`: Dominated by **Neutral sentiment** from retail employees discussing operational impacts.
 
 ---
 
-### 3. Emotional Tone Breakdown (Including Betrayal & Disappointment)
+### Section 2: Emotion Taxonomy & Keyphrase Analysis
 
+#### Figure 3: Emotion & Tone Distribution by Brand Controversy
 ![Emotion Distribution](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/03_emotion_distribution_by_case.png)
 
-_Figure 3: Breakdown of Anger/Outrage, Betrayal, Disappointment, Disgust/Criticism, Fear/Concern, and Support/Loyalty._
+*Figure 3: Breakdown of Anger/Outrage, Betrayal, Disappointment, Disgust/Criticism, Fear/Concern, and Support/Loyalty.*
+
+**Results & Insights**:
+- **Anger / Outrage**: Reaches its highest proportion in **Bud Light (20.97%)** and **Target (17.09%)**.
+- **Betrayal**: Concentrated primarily in **Chick-fil-A (2.96%)**, where core conservative supporters felt abandoned after donation policy modifications.
+- **Disappointment**: Highest in **Chick-fil-A (2.96%)** and **Target (2.42%)**, expressing sadness over corporate capitulation.
+- **Fear / Concern**: Dominates **Target (20.89%)**, driven by store safety and bomb threat reports.
 
 ---
 
-### 4. Top Keyphrase Bigrams per Brand
-
+#### Figure 4: Most Frequent Keyphrase Bigrams per Brand Case
 ![Top N-Grams](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/05_top_ngrams_by_case.png)
 
-_Figure 4: Most frequent 2-word keyphrases per brand controversy._
+*Figure 4: Top 2-word keyphrase bigrams extracted per brand controversy.*
 
-- **Chick-fil-A**: _"salvation army"_, _"fellowship christian"_, _"stop donating"_, _"fca salvation"_.
-- **Bud Light**: _"bud light"_, _"anheuser busch"_, _"dylan mulvaney"_, _"stay in our lane"_.
-- **Target**: _"pride merchandise"_, _"removing pride"_, _"extremists violence"_, _"target workers"_.
+**Results & Insights**:
+- **Chick-fil-A**: Dominant bigrams include *"salvation army"*, *"fellowship christian"*, *"stop donating"*, and *"christian athletes"*.
+- **Bud Light**: Dominant bigrams include *"bud light"*, *"anheuser busch"*, *"dylan mulvaney"*, and *"stay lane"*.
+- **Target**: Dominant bigrams include *"pride merchandise"*, *"removing pride"*, *"extremists violence"*, and *"target workers"*.
 
 ---
 
-### 5. Controversy Word Clouds
-
+#### Figure 5: Word Clouds of Comment Text per Brand Controversy
 ![Word Clouds](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/06_wordcloud_by_case.png)
 
-_Figure 5: Word frequency clouds highlights core narrative themes per brand._
+*Figure 5: Word frequency clouds highlighting core narrative themes per brand.*
+
+**Results & Insights**:
+- Visualizes prominent narrative terms per brand: **Bud Light** centers on marketing leadership and boycott efficacy; **Chick-fil-A** centers on religious charities; **Target** centers on employee safety and pride displays.
 
 ---
 
-## Exploratory Data Analysis (EDA) of Sentiments & Emotions
+### Section 3: Engagement, Heatmaps & Sentiment Quadrants (EDA)
 
-### 1. Virality & Community Engagement (Upvote Score by Emotion)
-
+#### Figure 6: Upvote Engagement & Virality Across Emotion Categories
 ![Upvotes by Emotion](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/07_upvotes_by_emotion_boxplot.png)
 
-_Figure 6: Upvote score distribution across emotion categories._
+*Figure 6: Upvote score distribution across emotion categories.*
 
-- **Fear & Threat Concerns drive the highest community upvoting** (Mean: **42.37 upvotes**), highlighting how safety concerns regarding employees and bomb threats resonated deeply across Reddit communities.
-- **Anger / Outrage** ranks second in virality (Mean: **31.58 upvotes**), confirming that outrage content receives strong upvote momentum on platform feeds.
-- **Disappointment** receives significant community support (Mean: **29.15 upvotes**), showing that expressions of dismay and letdown resonate with fellow users.
-- **Skepticism / Neutral** comments receive significantly lower engagement (Mean: **11.52 upvotes**).
+**Results & Insights**:
+- **Fear & Threat Concerns**: Highest mean upvote score (**42.37 upvotes**), reflecting broad community resonance around worker safety.
+- **Anger / Outrage**: Second highest virality (**31.58 average upvotes**), confirming that outrage drives platform engagement.
+- **Disappointment**: High community agreement (**29.15 average upvotes**).
+- **Betrayal**: Averages **4.50 upvotes**, occurring in specific niche subreddits (`r/atlanticdiscussions`, `r/Target`, `r/news`, `r/TraditionalCatholics`).
 
 ---
 
-### 2. Subreddit Ideological Profile & Emotion Heatmap
-
+#### Figure 7: Subreddit Ideological Emotion Heatmap (%)
 ![Subreddit Emotion Heatmap](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/08_emotion_by_subreddit_heatmap.png)
 
-_Figure 7: Emotion tone percentage heatmap across top subreddits._
+*Figure 7: Heatmap of emotion category percentages across top subreddits.*
 
-- **`r/WhitePeopleTwitter`**: Heavily skewed towards **Fear / Concern (33.04%)** and **Anger (18.26%)**, condemning violent anti-pride intimidation tactics.
-- **`r/news`**: High concentration of **Fear / Concern (27.04%)** and lowest **Support (6.63%)**, focusing on corporate retreat and news reports.
-- **`r/lgbt`**: Highest concentration of **Disappointment (5.37%)**, capturing heartbreak and dismay over corporations yielding to extremist boycotts.
-- **`r/Target`**: Dominated by **Skepticism / Neutral (52.72%)** and **Support / Loyalty (16.10%)**, reflecting store employees discussing inventory and operational policies.
+**Results & Insights**:
+- **`r/WhitePeopleTwitter`**: High **Fear / Concern (33.04%)** and **Anger (18.26%)**.
+- **`r/lgbt`**: Highest concentration of **Disappointment (5.37%)**.
+- **`r/news`**: High **Fear / Concern (27.04%)** and lowest **Support (6.63%)**.
+- **`r/Target`**: High **Skepticism / Neutral (52.72%)** and **Support / Loyalty (16.10%)**.
 
 ---
 
-### 3. Subjectivity vs. Polarity Sentiment Quadrants
+#### Figure 8: TextBlob Polarity vs. Subjectivity Quadrant Mapping
 ![Sentiment Quadrant](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/09_sentiment_subjectivity_quadrant.png)
 
-*Figure 8: TextBlob Polarity vs. Subjectivity quadrant colored by emotion tone.*
+*Figure 8: Scatter plot mapping comment Subjectivity vs Polarity colored by emotion tone.*
 
-- **Upper-Left Quadrant (High Subjectivity, Negative Polarity)**: Populated by **Anger / Outrage** and **Betrayal** comments, containing strong personal opinion words and accusatory rhetoric.
+**Results & Insights**:
+- **Upper-Left Quadrant (High Subjectivity $\ge 0.5$, Negative Polarity $< 0.0$)**: Populated almost exclusively by **Anger / Outrage** and **Betrayal**, containing high opinion intensity and accusatory language.
+- **Lower-Middle Quadrant (Low Subjectivity $< 0.5$, Neutral Polarity $\approx 0.0$)**: Populated by news reporting, factual observations, and **Skepticism / Neutral** comments.
 
 ---
 
-### 4. Temporal Emotion Progression (Anger, Betrayal & Disappointment Over Time)
+### Section 4: Temporal Progression, Author Stances & Hostility Index
+
+#### Figure 9: Temporal Progression of Primary Outrage Emotions
 ![Temporal Progression](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/10_temporal_emotion_progression.png)
 
 *Figure 9: Monthly volume progression of Anger, Betrayal, and Disappointment.*
 
-- **Anger** spikes sharply during initial boycott announcements.
-- **Betrayal** peaks when specific policy changes are formally announced (e.g. Chick-fil-A donation shifts).
-- **Disappointment** persists longer as consumers react to long-term corporate responses.
+**Results & Insights**:
+- **Anger / Outrage** exhibits immediate spikes during initial news breaks and boycott calls.
+- **Betrayal** peaks when specific policy modifications are officially confirmed.
+- **Disappointment** maintains a longer tail, reflecting sustained letdown as consumers evaluate corporate responses over time.
 
 ---
 
-### 5. Top Author Emotional Stances & Polarization Clusters
+#### Figure 10: Top Active Author Stances & Polarization Clusters
 ![Author Stances](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/11_author_polarization_clusters.png)
 
 *Figure 10: Emotional stance breakdown for top active authors.*
 
+**Results & Insights**:
+- Evaluates author engagement personas: Top active commenters demonstrate consistent emotional stances, categorizing users into *Outrage Detractors*, *Disappointed Allies*, and *Neutral Observers*.
+
 ---
 
-### 6. Outrage & Hostility Index (OHI) Distribution Across Emotions
+#### Figure 11: Outrage & Hostility Index (OHI) Distribution Across Emotions
 ![Hostility Index](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/12_hostility_toxicity_index.png)
 
-*Figure 11: Distribution of Outrage & Hostility Index (OHI) across emotions.*
+*Figure 11: Distribution of Outrage & Hostility Index (OHI) across emotion categories.*
 
-- **Anger / Outrage** records the highest mean OHI (**0.527**).
-- **Disappointment** records a high OHI (**0.490**).
-- **Betrayal** records an OHI of **0.381**, demonstrating focused negative sentiment without extreme profane hostility.
+**Results & Insights**:
+- **Anger / Outrage** records the highest average OHI score (**0.527**).
+- **Disappointment** records a high OHI score (**0.490**).
+- **Betrayal** records an OHI score of **0.381**, demonstrating focused negative sentiment without extreme profane hostility.
+
+---
+
+#### Figure 12: Upvote Score Distribution by Sentiment Polarity Label
+![Upvote vs Sentiment](file:///Users/rtjaiany/Documents/01%20-%20In%20Progress/scrapping_reddit/output/plots/04_upvote_vs_sentiment.png)
+
+*Figure 12: Boxplot distribution of upvotes across Positive, Neutral, and Negative sentiment labels.*
+
+**Results & Insights**:
+- Negative sentiment comments consistently show higher upvote dispersion and higher upper quartiles compared to neutral comments.
 
 ---
 
