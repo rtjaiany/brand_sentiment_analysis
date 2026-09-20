@@ -1,0 +1,22 @@
+# Excel Data Files (Excluded as requested)
+*.xlsx
+output/**/*.xlsx
+output/individual/
+output/cases/
+output/master/
+
+# Python Cache & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+*.log
+
+# OS Generated Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
